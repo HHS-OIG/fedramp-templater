@@ -45,6 +45,20 @@ func (st *SummaryTable) fillResponsibleRole(openControlData opencontrols.Data, c
 	return
 }
 
+func (st *SummaryTable) fillParameters(openControlData opencontrols.Data, control string) (err error) {
+	parameters, err := findParameters(st)
+	if err != nil {
+		return
+	}
+
+	for _, paramCell := range parameters.List() {
+	    paramCell := paramCell.(*Parameter)
+	    yamlParameter := openControlData.GetParameter(control, paramCell.getId())
+	    paramCell.setValue(yamlParameter)
+	}
+	return
+}
+
 func (st *SummaryTable) fillControlOrigination(openControlData opencontrols.Data, control string) (err error) {
 	controlOrigins := openControlData.GetControlOrigins(control)
 	checkedOriginsSet := controlOrigins.GetCheckedOrigins()
@@ -66,6 +80,10 @@ func (st *SummaryTable) Fill(openControlData opencontrols.Data) (err error) {
 		return
 	}
 	err = st.fillResponsibleRole(openControlData, control)
+	if err != nil {
+		return
+	}
+	err = st.fillParameters(openControlData, control)
 	if err != nil {
 		return
 	}

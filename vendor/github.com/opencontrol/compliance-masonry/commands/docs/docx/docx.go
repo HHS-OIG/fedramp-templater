@@ -110,21 +110,17 @@ func getSpecificGenericSections(sections []base.Section, text string, specifiedS
 
 		// If section header exists, let's print it's corresponding text and not the header itself.
 		if specifiedSections.Has(section.GetKey()) {
-			text = fmt.Sprintf("%s%s\n", text, section.GetText())
-			specifiedSections.Remove(section.GetKey())
+			return fmt.Sprintf("%s%s\n", text, section.GetText())
 		}
 	}
 	// In the case that we do not have the section, print warning that information was not found.
-	if specifiedSections.Size() != 0 {
-		text = fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
-	}
-	return text
+	return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
 }
 
 // getParameterInfo will just print the parameter section text. No need to print the section header since it was specified.
 func getParameterInfo(text string, justification models.Verification, component base.Component, specifiedSections *set.Set) (string) {
 	// Add the component name.
-	text = fmt.Sprintf("%s%s\n", text, component.GetName())
+	//text = fmt.Sprintf("%s%s\n", text, component.GetName())
 
 	// Use generic []base.Section handler.
 	return getSpecificGenericSections(justification.SatisfiesData.GetParameters(), text, specifiedSections)
@@ -158,13 +154,13 @@ func (openControl *OpenControlDocx) getComponentText(infoType controlInfoType, s
 				// Get the Component Text
 				switch(infoType) {
 				case allControlInfo:
-					text = fmt.Sprintf("%s%s", text, getAllNarrativeSections(text, justification, component))
+					text = getAllNarrativeSections(text, justification, component)
 				case controlInfo:
-					text = fmt.Sprintf("%s%s", text, getNarrativeSection(text, justification, component, sectionSet))
+					text = getNarrativeSection(text, justification, component, sectionSet)
 				case parameterInfo:
-					text = fmt.Sprintf("%s%s", text, getParameterInfo(text, justification, component, sectionSet))
+					text = getParameterInfo(text, justification, component, sectionSet)
 				case responsibleRoleInfo:
-					text = fmt.Sprintf("%s%s", text, getResponsibleRoleInfo(text, component))
+					text = getResponsibleRoleInfo(text, component)
 				}
 			})
 		}

@@ -31,6 +31,11 @@ func (d *Data) GetResponsibleRoles(control string) string {
 	return d.ocd.FormatResponsibleRoles(standardKey, control)
 }
 
+// GetParameter returns the responsible role information for each component matching the specified control.
+func (d *Data) GetParameter(control string, sectionKey string) string {
+	return d.ocd.FormatParameter(standardKey, control, sectionKey)
+}
+
 // GetNarrative returns the justification text for the specified control. Pass an empty string for `sectionKey` if you are looking for the overall narrative.
 func (d *Data) GetNarrative(control string, sectionKey string) string {
 	return d.ocd.FormatNarrative(standardKey, control, sectionKey)
