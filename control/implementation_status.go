@@ -78,7 +78,7 @@ func newImplementationStatus(tbl *table) (*implementationStatus, error) {
 		}
 
 		// Only construct the checkbox struct if the box and text are found.
-		origins[implementationStatusKey] = docx.NewCheckBox(checkBox, &textNodes)
+		statuses[implementationStatusKey] = docx.NewCheckBox(checkBox, &textNodes)
 	}
 	return &implementationStatus{cell: rows[0], statuses: statuses}, nil
 }
