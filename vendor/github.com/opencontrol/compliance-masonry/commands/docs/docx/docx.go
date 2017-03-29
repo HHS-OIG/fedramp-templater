@@ -103,7 +103,9 @@ func getAllNarrativeSections(text string, justification models.Verification, com
 func getSpecificGenericSections(sections []base.Section, text string, specifiedSections *set.Set) (string) {
 	// In the case that the user does not provide any sections.
 	if specifiedSections.Size() == 0 {
-		return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+		//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+		// Currently we're disabling the warning text
+		return text
 	}
 	for _, section := range sections {
 		// If we only want certain section(s)...
@@ -114,7 +116,9 @@ func getSpecificGenericSections(sections []base.Section, text string, specifiedS
 		}
 	}
 	// In the case that we do not have the section, print warning that information was not found.
-	return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	// Currently we're disabling the warning text
+	return text
 }
 
 // getParameterInfo will just print the parameter section text. No need to print the section header since it was specified.
