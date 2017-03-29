@@ -70,11 +70,15 @@ func createSectionsSet(sections ...string) *set.Set {
 
 // getNarrativeSection will just print the narrative section text. No need to print the section header since it was specified.
 func getNarrativeSection(text string, justification models.Verification, component base.Component, specifiedSections *set.Set) (string) {
-	// Add the component name.
-	text = fmt.Sprintf("%s%s\n", text, component.GetName())
+	// Add the component name only if the text isn't empty
+	//text = fmt.Sprintf("%s%s\n", text, component.GetName())
 
 	// Use generic []base.Section handler.
-	return getSpecificGenericSections(justification.SatisfiesData.GetNarratives(), text, specifiedSections)
+	sectionText := getSpecificGenericSections(justification.SatisfiesData.GetNarratives(), "", specifiedSections)
+	if sectionText != "" {
+		text = fmt.Sprintf("%s%s\n%s", text, component.GetName(), sectionText)
+	}
+	return text
 }
 
 // getAllNarrativeSection will print both the section header and the section text for all narrative sections.
