@@ -100,11 +100,10 @@ func (st *SummaryTable) Fill(openControlData opencontrols.Data) (err error) {
 	if err != nil {
 		return
 	}
-	// TODO fix responsible role
-	//err = st.fillResponsibleRole(openControlData, control)
-	//if err != nil {
-	//	return
-	//}
+	err = st.fillResponsibleRole(openControlData, control)
+	if err != nil {
+		return
+	}
 	err = st.fillParameters(openControlData, control)
 	if err != nil {
 		return

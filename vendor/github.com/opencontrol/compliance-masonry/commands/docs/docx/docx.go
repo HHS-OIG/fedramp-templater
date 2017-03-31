@@ -8,7 +8,7 @@ import (
 	"github.com/opencontrol/compliance-masonry/models"
 	"github.com/opencontrol/compliance-masonry/models/components/versions/base"
 	"gopkg.in/fatih/set.v0"
-	"github.com/opencontrol/compliance-masonry/tools/constants"
+	//"github.com/opencontrol/compliance-masonry/tools/constants"
 )
 
 // Config contains data for docx template export configurations
@@ -137,13 +137,14 @@ func getParameterInfo(text string, justification models.Verification, component 
 // getResponsibleRoleInfo will just print the responsible role if it exists.
 func getResponsibleRoleInfo(text string, component base.Component) (string) {
 	// Add the component name.
-	text = fmt.Sprintf("%s%s: ", text, component.GetName())
+	//text = fmt.Sprintf("%s%s: ", text, component.GetName())
 	// Print out the component name and the responsible for that component.
 	if component.GetResponsibleRole() != "" {
 		return fmt.Sprintf("%s%s\n", text, component.GetResponsibleRole())
 	}
 	// Else, print warning indicating there was no info.
-	return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	return text
 }
 
 // getComponentText is for information that will need to dig into the justifications.
