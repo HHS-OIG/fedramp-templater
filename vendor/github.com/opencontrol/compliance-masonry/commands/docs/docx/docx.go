@@ -8,7 +8,7 @@ import (
 	"github.com/opencontrol/compliance-masonry/models"
 	"github.com/opencontrol/compliance-masonry/models/components/versions/base"
 	"gopkg.in/fatih/set.v0"
-	"github.com/opencontrol/compliance-masonry/tools/constants"
+	//"github.com/opencontrol/compliance-masonry/tools/constants"
 )
 
 // Config contains data for docx template export configurations
@@ -70,11 +70,15 @@ func createSectionsSet(sections ...string) *set.Set {
 
 // getNarrativeSection will just print the narrative section text. No need to print the section header since it was specified.
 func getNarrativeSection(text string, justification models.Verification, component base.Component, specifiedSections *set.Set) (string) {
-	// Add the component name.
-	text = fmt.Sprintf("%s%s\n", text, component.GetName())
+	// Add the component name only if the text isn't empty
+	//text = fmt.Sprintf("%s%s\n", text, component.GetName())
 
 	// Use generic []base.Section handler.
-	return getSpecificGenericSections(justification.SatisfiesData.GetNarratives(), text, specifiedSections)
+	sectionText := getSpecificGenericSections(justification.SatisfiesData.GetNarratives(), "", specifiedSections)
+	if sectionText != "" {
+		text = fmt.Sprintf("%s%s\n%s", text, component.GetName(), sectionText)
+	}
+	return text
 }
 
 // getAllNarrativeSection will print both the section header and the section text for all narrative sections.
@@ -103,28 +107,28 @@ func getAllNarrativeSections(text string, justification models.Verification, com
 func getSpecificGenericSections(sections []base.Section, text string, specifiedSections *set.Set) (string) {
 	// In the case that the user does not provide any sections.
 	if specifiedSections.Size() == 0 {
-		return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+		//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+		// Currently we're disabling the warning text
+		return text
 	}
 	for _, section := range sections {
 		// If we only want certain section(s)...
 
 		// If section header exists, let's print it's corresponding text and not the header itself.
 		if specifiedSections.Has(section.GetKey()) {
-			text = fmt.Sprintf("%s%s\n", text, section.GetText())
-			specifiedSections.Remove(section.GetKey())
+			return fmt.Sprintf("%s%s\n", text, section.GetText())
 		}
 	}
 	// In the case that we do not have the section, print warning that information was not found.
-	if specifiedSections.Size() != 0 {
-		text = fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
-	}
+	//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	// Currently we're disabling the warning text
 	return text
 }
 
 // getParameterInfo will just print the parameter section text. No need to print the section header since it was specified.
 func getParameterInfo(text string, justification models.Verification, component base.Component, specifiedSections *set.Set) (string) {
 	// Add the component name.
-	text = fmt.Sprintf("%s%s\n", text, component.GetName())
+	//text = fmt.Sprintf("%s%s\n", text, component.GetName())
 
 	// Use generic []base.Section handler.
 	return getSpecificGenericSections(justification.SatisfiesData.GetParameters(), text, specifiedSections)
@@ -133,13 +137,14 @@ func getParameterInfo(text string, justification models.Verification, component 
 // getResponsibleRoleInfo will just print the responsible role if it exists.
 func getResponsibleRoleInfo(text string, component base.Component) (string) {
 	// Add the component name.
-	text = fmt.Sprintf("%s%s: ", text, component.GetName())
+	//text = fmt.Sprintf("%s%s: ", text, component.GetName())
 	// Print out the component name and the responsible for that component.
 	if component.GetResponsibleRole() != "" {
 		return fmt.Sprintf("%s%s\n", text, component.GetResponsibleRole())
 	}
 	// Else, print warning indicating there was no info.
-	return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	//return fmt.Sprintf("%s%s\n", text, constants.WarningNoInformationAvailable)
+	return text
 }
 
 // getComponentText is for information that will need to dig into the justifications.
@@ -158,13 +163,13 @@ func (openControl *OpenControlDocx) getComponentText(infoType controlInfoType, s
 				// Get the Component Text
 				switch(infoType) {
 				case allControlInfo:
-					text = fmt.Sprintf("%s%s", text, getAllNarrativeSections(text, justification, component))
+					text = getAllNarrativeSections(text, justification, component)
 				case controlInfo:
-					text = fmt.Sprintf("%s%s", text, getNarrativeSection(text, justification, component, sectionSet))
+					text = getNarrativeSection(text, justification, component, sectionSet)
 				case parameterInfo:
-					text = fmt.Sprintf("%s%s", text, getParameterInfo(text, justification, component, sectionSet))
+					text = getParameterInfo(text, justification, component, sectionSet)
 				case responsibleRoleInfo:
-					text = fmt.Sprintf("%s%s", text, getResponsibleRoleInfo(text, component))
+					text = getResponsibleRoleInfo(text, component)
 				}
 			})
 		}

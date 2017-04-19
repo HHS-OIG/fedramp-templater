@@ -3,6 +3,8 @@ package models
 import (
 	"sync"
 	"github.com/opencontrol/compliance-masonry/models/components/versions/base"
+	"sort"
+	"regexp"
 )
 
 // Verification struct holds data for a specific component and verification
@@ -76,6 +78,18 @@ func (justifications *Justifications) Get(standardKey string, controlKey string)
 	if !controlKeyExists {
 		return nil
 	}
+	// Sort the justifications properly
+	sort.Slice(controlJustifications, func(i, j int) bool {
+		lastRegex := regexp.MustCompile(`^AWS_.*$`)
+		firstRegex := regexp.MustCompile(`^[A-Z]{2}_Policy$`)
+        if lastRegex.MatchString(controlJustifications[i].ComponentKey) {
+            return false
+		}
+        if firstRegex.MatchString(controlJustifications[i].ComponentKey) {
+            return true
+		}
+	    return controlJustifications[i].ComponentKey < controlJustifications[j].ComponentKey
+	})
 	return controlJustifications
 }
 

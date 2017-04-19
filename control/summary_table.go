@@ -3,6 +3,7 @@ package control
 import (
 	"github.com/jbowtie/gokogiri/xml"
 	"github.com/opencontrol/fedramp-templater/common/origin"
+	"github.com/opencontrol/fedramp-templater/common/implementation"
 	"github.com/opencontrol/fedramp-templater/common/source"
 	"github.com/opencontrol/fedramp-templater/opencontrols"
 	"github.com/opencontrol/fedramp-templater/reporter"
@@ -12,12 +13,14 @@ import (
 const (
 	responsibleRoleField    = "Responsible Role"
 	controlOriginationField = "Control Origination"
+	implementationStatusField = "Implementation Status"
 )
 
 // SummaryTable represents the node in the Word docx XML tree that corresponds to the summary information for a security control.
 type SummaryTable struct {
 	table
 	originTable *controlOrigination
+	implementationTable *implementationStatus
 }
 
 // NewSummaryTable creates a SummaryTable instance.
@@ -27,7 +30,11 @@ func NewSummaryTable(root xml.Node) (SummaryTable, error) {
 	if err != nil {
 		return SummaryTable{}, err
 	}
-	return SummaryTable{tbl, originTable}, nil
+	implementationTable, err := newImplementationStatus(&tbl)
+	if err != nil {
+		return SummaryTable{}, err
+	}
+	return SummaryTable{tbl, originTable, implementationTable}, nil
 }
 
 func (st *SummaryTable) controlName() (name string, err error) {
@@ -45,6 +52,20 @@ func (st *SummaryTable) fillResponsibleRole(openControlData opencontrols.Data, c
 	return
 }
 
+func (st *SummaryTable) fillParameters(openControlData opencontrols.Data, control string) (err error) {
+	parameters, err := findParameters(st)
+	if err != nil {
+		return
+	}
+
+	for _, paramCell := range parameters.List() {
+	    paramCell := paramCell.(*Parameter)
+	    yamlParameter := openControlData.GetParameter(control, paramCell.getId())
+	    paramCell.setValue(yamlParameter)
+	}
+	return
+}
+
 func (st *SummaryTable) fillControlOrigination(openControlData opencontrols.Data, control string) (err error) {
 	controlOrigins := openControlData.GetControlOrigins(control)
 	checkedOriginsSet := controlOrigins.GetCheckedOrigins()
@@ -59,6 +80,20 @@ func (st *SummaryTable) fillControlOrigination(openControlData opencontrols.Data
 	return
 }
 
+func (st *SummaryTable) fillImplementationStatus(openControlData opencontrols.Data, control string) (err error) {
+	implementationStatuses := openControlData.GetImplementationStatuses(control)
+	checkedStatusesSet := implementationStatuses.GetCheckedImplementationStatuses()
+	checkedStatuses := implementation.ConvertSetToKeys(checkedStatusesSet)
+
+	for _, checkedStatus := range checkedStatuses {
+		if checkedStatus == implementation.NoStatus {
+			continue
+		}
+		st.implementationTable.statuses[checkedStatus].SetCheckMarkTo(true)
+	}
+	return
+}
+
 // Fill inserts the OpenControl justifications into the table. Note this modifies the `table`.
 func (st *SummaryTable) Fill(openControlData opencontrols.Data) (err error) {
 	control, err := st.controlName()
@@ -69,7 +104,15 @@ func (st *SummaryTable) Fill(openControlData opencontrols.Data) (err error) {
 	if err != nil {
 		return
 	}
+	err = st.fillParameters(openControlData, control)
+	if err != nil {
+		return
+	}
 	err = st.fillControlOrigination(openControlData, control)
+	if err != nil {
+		return
+	}
+	err = st.fillImplementationStatus(openControlData, control)
 	if err != nil {
 		return
 	}

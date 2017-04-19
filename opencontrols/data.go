@@ -4,6 +4,7 @@ import (
 	"github.com/opencontrol/compliance-masonry/commands/docs/docx"
 	"github.com/opencontrol/compliance-masonry/models"
 	"github.com/opencontrol/fedramp-templater/common/origin"
+	"github.com/opencontrol/fedramp-templater/common/implementation"
 	"gopkg.in/fatih/set.v0"
 )
 
@@ -29,6 +30,11 @@ func LoadFrom(dirPath string) (data Data, errors []error) {
 // GetResponsibleRoles returns the responsible role information for each component matching the specified control.
 func (d *Data) GetResponsibleRoles(control string) string {
 	return d.ocd.FormatResponsibleRoles(standardKey, control)
+}
+
+// GetParameter returns the responsible role information for each component matching the specified control.
+func (d *Data) GetParameter(control string, sectionKey string) string {
+	return d.ocd.FormatParameter(standardKey, control, sectionKey)
 }
 
 // GetNarrative returns the justification text for the specified control. Pass an empty string for `sectionKey` if you are looking for the overall narrative.
@@ -74,4 +80,44 @@ func (origins ControlOrigins) GetCheckedOrigins() *set.Set {
 
 	}
 	return yamlControlOrigins
+}
+
+// GetImplementationStatuses returns the implementation status information for each component matching the specified control.
+func (d *Data) GetImplementationStatuses(control string) ImplementationStatuses {
+	implementationStatuss := ImplementationStatuses{}
+	justifications := d.ocd.Justifications.Get(standardKey, control)
+	for _, justification := range justifications {
+		implementationStatuss.statuses = append(implementationStatuss.statuses, justification.SatisfiesData.GetImplementationStatus())
+	}
+	return implementationStatuss
+}
+
+// ImplementationStatuses is a wrapper for the extracted data from the YAML for a particular control.
+type ImplementationStatuses struct {
+	statuses []string
+}
+
+func detectImplementationStatusKey(text string) implementation.Key {
+	implementationStatusMappings := implementation.GetSourceMappings()
+	for implementationStatus, implementationStatusMapping := range implementationStatusMappings {
+		if implementationStatusMapping.IsYAMLMappingEqualTo(text) {
+			return implementationStatus
+		}
+	}
+	return implementation.NoStatus
+}
+
+// GetCheckedImplementationStatuses will return the list of implementation status keys.
+func (statuses ImplementationStatuses) GetCheckedImplementationStatuses() *set.Set {
+	// find the control statuses currently checked in the section in the YAML.
+	yamlImplementationStatuses := set.New()
+	for _, implementationStatus := range statuses.statuses {
+		implementationStatusKey := detectImplementationStatusKey(implementationStatus)
+		if implementationStatusKey == implementation.NoStatus {
+			continue
+		}
+		yamlImplementationStatuses.Add(implementationStatusKey)
+
+	}
+	return yamlImplementationStatuses
 }
