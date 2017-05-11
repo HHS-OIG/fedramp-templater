@@ -2,6 +2,7 @@ package docx
 
 import (
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/opencontrol/doc-template"
@@ -175,7 +176,7 @@ func (openControl *OpenControlDocx) getComponentText(infoType controlInfoType, s
 		}
 	})
 
-	return text
+	return strings.TrimSpace(text)
 }
 
 // FormatResponsibleRoles fills in the responsible role for each component for a given standard and control.
