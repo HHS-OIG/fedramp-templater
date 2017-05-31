@@ -26,6 +26,18 @@ func (n narrativeSection) parsePart() (key string, err error) {
 	return
 }
 
+func (n narrativeSection) parseReq() (key string, err error) {
+	re := regexp.MustCompile(`Req. ([1-9])`)
+	content := []byte(n.row.Content())
+	subMatches := re.FindSubmatch(content)
+	if len(subMatches) != 2 {
+		err = errors.New("No Reqs found.")
+		return
+	}
+	key = string(subMatches[1])
+	return
+}
+
 // GetKey returns the narrative section "part"/key. `key` will be an empty string if there is no "Part".
 func (n narrativeSection) GetKey() (key string, err error) {
 	cells, err := xmlHelper.SearchSubtree(n.row, `./w:tc`)
@@ -36,7 +48,10 @@ func (n narrativeSection) GetKey() (key string, err error) {
 	} else if numCells == 2 {
 		key, err = n.parsePart()
 		if err != nil {
-			return
+		    key, err = n.parseReq()
+		    if err != nil {
+			    return
+		    }
 		}
 	} else {
 		err = errors.New("Don't know how to parse row.")
