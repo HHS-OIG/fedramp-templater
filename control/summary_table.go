@@ -71,6 +71,11 @@ func (st *SummaryTable) fillControlOrigination(openControlData opencontrols.Data
 	checkedOriginsSet := controlOrigins.GetCheckedOrigins()
 	checkedOrigins := origin.ConvertSetToKeys(checkedOriginsSet)
 
+    // Uncheck any pre-populated boxes
+    for _, origin := range st.originTable.origins {
+	    origin.SetCheckMarkTo(false)
+	}
+
 	for _, checkedOrigin := range checkedOrigins {
 		if checkedOrigin == origin.NoOrigin {
 			continue

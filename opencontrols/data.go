@@ -47,7 +47,7 @@ func (d *Data) GetControlOrigins(control string) ControlOrigins {
 	controlOrigins := ControlOrigins{}
 	justifications := d.ocd.Justifications.Get(standardKey, control)
 	for _, justification := range justifications {
-		controlOrigins.origins = append(controlOrigins.origins, justification.SatisfiesData.GetControlOrigin())
+		controlOrigins.origins = append(controlOrigins.origins, justification.SatisfiesData.GetControlOrigins()...)
 	}
 	return controlOrigins
 }
