@@ -77,7 +77,8 @@ func getNarrativeSection(text string, justification models.Verification, compone
 	// Use generic []base.Section handler.
 	sectionText := getSpecificGenericSections(justification.SatisfiesData.GetNarratives(), "", specifiedSections)
 	if sectionText != "" {
-		text = fmt.Sprintf("%s%s\n%s", text, component.GetName(), sectionText)
+		// dunder for title is indicator to make the title underlined
+		text = fmt.Sprintf("%s__%s__\n%s", text, component.GetName(), sectionText)
 	}
 	return text
 }

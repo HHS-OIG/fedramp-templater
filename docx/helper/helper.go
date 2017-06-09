@@ -2,6 +2,7 @@ package helper
 
 import (
 	"strings"
+	"regexp"
 
 	"github.com/jbowtie/gokogiri"
 	"github.com/jbowtie/gokogiri/xml"
@@ -30,14 +31,21 @@ func GenerateXML(wordDoc *docx.Docx) (xmlDoc *xml.XmlDocument, err error) {
 
 // FillParagraph inserts the given content into the provided docx XML paragraph node. Note that newlines aren't respected - you'll need to create a new paragraph node for each.
 func FillParagraph(paragraph xml.Node, content string) (err error) {
-	// this seems to be the easiest way to create child notes
-	err = paragraph.SetChildren(`<w:r><w:t></w:t></w:r>`)
+	err = paragraph.SetChildren(`<w:r></w:r>`)
 	if err != nil {
 		return
 	}
-	textCell := paragraph.FirstChild().FirstChild()
-
-	textCell.SetContent(content)
+	textParent := paragraph.FirstChild()
+	// Right now we only support an entire line being underlined.
+	// TODO enhance this to support underlines within a line of text
+	underline_regex := regexp.MustCompile("__(.+)__")
+	group := underline_regex.FindSubmatch([]byte(content))
+	if (len(group) != 0) {
+		textParent.AddChild(`<w:rPr><w:u w:val="single"/></w:rPr>`)
+		content = string(group[1])
+	}
+	textParent.AddChild(`<w:t></w:t>`)
+	textParent.LastChild().SetContent(content)
 	return
 }
 
